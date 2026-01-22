@@ -1,0 +1,20 @@
+personas:
+  security_analyst:
+    description: "Resposible for Security handling of proejct"
+    privilege_level: "High"
+    intent: "Has access on. aprivileged level for easier access and surveillance"
+  
+  cloud_engineer:
+    description: "Builds and operates cloud infrastructure"
+    privilege_level: "medium"
+    intent: "create and manage cloud resources but no IAM admin"
+
+  auditor:
+    description: "Performs compliance and access reviews"
+    privilege_level: "low"
+    intent: "read-only access for audit and compliance evidence"
+
+  devsecops_engineer:
+    description: "Manages CI/CD and security automation"
+    privilege_level: "medium"
+    intent: "manage pipelines and service identities"

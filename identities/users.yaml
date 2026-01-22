@@ -1,0 +1,28 @@
+users:
+  - user_id: kp
+    display_name: "Kp"
+    email: "kp@example.com"
+    persona: "security_analyst"
+    status: "active"
+    type: "human"
+
+  - user_id: john
+    display_name: "John"
+    email: "john@example.com"
+    persona: "cloud_engineer"
+    status: "active"
+    type: "human"
+
+  - user_id: christy
+    display_name: "Christy"
+    email: "christy@example.com"
+    persona: "auditor"
+    status: "active"
+    type: "human"
+
+  - user_id: jay
+    display_name: "Jay"
+    email: "jay@example.com"
+    persona: "devsecops_engineer"
+    status: "active"
+    type: "human"
