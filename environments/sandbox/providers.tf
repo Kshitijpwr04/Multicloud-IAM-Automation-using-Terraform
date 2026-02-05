@@ -20,6 +20,9 @@ terraform {
 # Azure: uses Azure CLI auth (since you logged in with `az login`)
 provider "azurerm" {
   features {}
+
+  subscription_id = var.azure_subscription_id
+  tenant_id       = var.azure_tenant_id
 }
 
 # AWS: stub provider for Phase 2 validation (no resources yet)
