@@ -22,3 +22,12 @@ locals {
     break_glass        = "Owner"
   }
 }
+# Phase 4.2 — Group-based Azure RBAC assignments (to Entra persona groups)
+
+resource "azurerm_role_assignment" "persona_groups" {
+  for_each = local.persona_to_azure_role
+
+  scope                = azurerm_resource_group.sandbox.id
+  role_definition_name = each.value
+  principal_id         = msgraph_resource.persona_group[each.key].id
+}
