@@ -24,10 +24,28 @@ locals {
 }
 # Phase 4.2 — Group-based Azure RBAC assignments (to Entra persona groups)
 
-resource "azurerm_role_assignment" "persona_groups" {
+/*resource "azurerm_role_assignment" "persona_groups" {
   for_each = local.persona_to_azure_role
 
   scope                = azurerm_resource_group.sandbox.id
   role_definition_name = each.value
   principal_id         = msgraph_resource.persona_group[each.key].id
+}*/
+#4.3 changed to exclude Break glass
+resource "azurerm_role_assignment" "persona_groups" {
+  for_each = {
+    for k, v in local.persona_to_azure_role : k => v if k != "break_glass"
+  }
+
+  scope                = azurerm_resource_group.sandbox.id
+  role_definition_name = each.value
+  principal_id         = msgraph_resource.persona_group[each.key].id
+}
+
+###
+#4.3 Break-glass: explicit, isolated RBAC assignment
+resource "azurerm_role_assignment" "break_glass_owner" {
+  scope                = azurerm_resource_group.sandbox.id
+  role_definition_name = "Owner"
+  principal_id         = msgraph_resource.persona_group["break_glass"].id
 }
