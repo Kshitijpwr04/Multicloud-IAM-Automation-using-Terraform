@@ -3,7 +3,7 @@ resource "azurerm_resource_group" "sandbox" {
   location = var.location
 }
 
-# to add RBAC Assignment to current user on the resource group
+#3.2 to add RBAC Assignment to current user on the resource group
 data "azurerm_client_config" "current" {}
 
 resource "azurerm_role_assignment" "sandbox_reader" {
@@ -12,12 +12,4 @@ resource "azurerm_role_assignment" "sandbox_reader" {
   principal_id         = data.azurerm_client_config.current.object_id
 }
 
-# mapping rest users to their personas
-locals {
-  persona_to_azure_role = {
-    security_analyst    = "Reader"
-    auditor             = "Reader"
-    cloud_engineer      = "Contributor"
-    devsecops_engineer  = "Contributor"
-  }
-}
+
