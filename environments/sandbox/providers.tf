@@ -14,6 +14,11 @@ terraform {
       source  = "hashicorp/google"
       version = "~> 5.0"
     }
+    #4.1 enable us to add entra users and groups
+    msgraph = {
+      source  = "microsoft/msgraph"
+      version = "~> 0.3"
+    }
   }
 }
 
@@ -35,3 +40,5 @@ provider "google" {
   project = var.gcp_project_id
   region  = var.gcp_region
 }
+
+provider "msgraph" {}

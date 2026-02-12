@@ -19,3 +19,21 @@ variable "azure_tenant_id" {
   type    = string
   default = "028eb7df-cb19-417e-84ad-d40af9d0e53f"
 }
+
+variable "aws_region" {
+  type        = string
+  description = "AWS region for the sandbox environment"
+  default     = "us-east-1"
+}
+#5.2
+variable "aws_name_prefix" {
+  type        = string
+  description = "Prefix for AWS IAM role names"
+  default     = "iam-persona"
+}
+
+variable "aws_max_session_duration_seconds" {
+  type        = number
+  description = "Max AWS role session duration"
+  default     = 3600
+}
