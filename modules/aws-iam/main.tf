@@ -22,7 +22,7 @@ resource "aws_iam_role" "persona" {
   name                 = "${var.name_prefix}-${each.key}"
   assume_role_policy   = data.aws_iam_policy_document.assume_role_trust.json
   max_session_duration = var.max_session_duration_seconds
-
+  permissions_boundary = local.effective_permission_boundary_arn
   tags = {
     Project = "Multicloud IAM Automation using Terraform"
     Phase   = "5"
@@ -52,4 +52,27 @@ resource "aws_iam_role_policy_attachment" "persona" {
 
   role       = aws_iam_role.persona[each.value.persona].name
   policy_arn = each.value.arn
+
+}
+# Placeholder permission boundary (tighten later)
+data "aws_iam_policy_document" "permission_boundary" {
+  statement {
+    sid       = "AllowAllActionsPlaceholder"
+    effect    = "Allow"
+    actions   = ["*"]
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_policy" "permission_boundary" {
+  count       = var.use_permission_boundary && var.permission_boundary_policy_arn == null ? 1 : 0
+  name        = "${var.name_prefix}-permission-boundary"
+  description = "Placeholder permission boundary for persona roles (tighten in later phases)"
+  policy      = data.aws_iam_policy_document.permission_boundary.json
+}
+
+locals {
+  effective_permission_boundary_arn = var.use_permission_boundary ? (
+    var.permission_boundary_policy_arn != null ? var.permission_boundary_policy_arn : aws_iam_policy.permission_boundary[0].arn
+  ) : null
 }

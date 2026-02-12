@@ -15,3 +15,16 @@ variable "persona_to_policy_arns" {
   type        = map(list(string))
   description = "Persona -> list of AWS managed policy ARNs"
 }
+
+5.3
+variable "use_permission_boundary" {
+  type        = bool
+  description = "Whether to apply a permission boundary to persona roles"
+  default     = true
+}
+
+variable "permission_boundary_policy_arn" {
+  type        = string
+  description = "Existing IAM policy ARN to use as permission boundary (optional). If null, module creates a placeholder boundary policy."
+  default     = null
+}

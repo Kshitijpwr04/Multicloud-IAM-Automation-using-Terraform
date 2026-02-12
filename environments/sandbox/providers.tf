@@ -38,7 +38,7 @@ provider "aws" {
 # GCP: stub provider for Phase 2 validation (no resources yet)
 provider "google" {
   project = var.gcp_project_id
-  region  = var.gcp_region
+  region  = "us-central1"
 }
 
 provider "msgraph" {}

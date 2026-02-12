@@ -37,3 +37,15 @@ variable "aws_max_session_duration_seconds" {
   description = "Max AWS role session duration"
   default     = 3600
 }
+#6.2
+variable "gcp_project_id" {
+  type        = string
+  description = "GCP project id for sandbox (can be placeholder for code-only)"
+  default     = "CHANGE_ME_GCP_PROJECT_ID"
+}
+
+variable "gcp_name_prefix" {
+  type        = string
+  description = "Prefix for GCP IAM objects (service accounts)"
+  default     = "iam"
+}
