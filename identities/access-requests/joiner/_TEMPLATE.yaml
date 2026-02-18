@@ -1,0 +1,13 @@
+request_type: joiner
+request_id: JR-0001
+requested_by: manager@example.com
+requested_at: 2026-02-18
+
+user:
+  email: newhire@example.com
+  display_name: New Hire
+  persona: security_analyst
+  status: active
+
+justification: >
+  New hire joining SOC. Needs read access for investigation.
