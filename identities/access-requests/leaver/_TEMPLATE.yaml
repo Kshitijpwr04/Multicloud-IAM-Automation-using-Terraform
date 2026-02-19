@@ -1,0 +1,12 @@
+request_type: leaver
+request_id: LR-0001
+requested_by: manager@example.com
+requested_at: 2026-02-18
+
+user:
+  email: existing.user@example.com
+  termination_date: 2026-02-18
+  reason: "Offboarding"
+
+justification: >
+  Employee offboarding. Remove access across all clouds and platforms.

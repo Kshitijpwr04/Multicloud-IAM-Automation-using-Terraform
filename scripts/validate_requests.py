@@ -92,6 +92,8 @@ def main():
         if rtype == "leaver":
             if email not in users_by_email:
                 fail(f"{f}: leaver user not found in users.yaml: {email}")
+            if "termination_date" not in user:
+                fail(f"{f}: leaver missing user.termination_date (YYYY-MM-DD)")
 
     print("[OK] Request files validated (joiner/mover/leaver).")
 
