@@ -1,0 +1,140 @@
+[
+  {
+    "address": "module.azure_iam.azurerm_role_assignment.break_glass_owner",
+    "resource_type": "azurerm_role_assignment",
+    "values": {
+      "condition": "",
+      "condition_version": "",
+      "delegated_managed_identity_resource_id": "",
+      "description": "",
+      "id": "/subscriptions/c39ffe15-279e-4da2-b993-6931c591eeec/resourceGroups/rg-iam-sandbox/providers/Microsoft.Authorization/roleAssignments/6903e718-6e26-49ee-2533-c5bfda6fe0aa",
+      "name": "6903e718-6e26-49ee-2533-c5bfda6fe0aa",
+      "principal_id": "43d2e844-986b-47d1-934b-2da9059a4523",
+      "principal_type": "Group",
+      "role_definition_id": "/subscriptions/c39ffe15-279e-4da2-b993-6931c591eeec/providers/Microsoft.Authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635",
+      "role_definition_name": "Owner",
+      "scope": "/subscriptions/c39ffe15-279e-4da2-b993-6931c591eeec/resourceGroups/rg-iam-sandbox",
+      "skip_service_principal_aad_check": null,
+      "timeouts": null
+    },
+    "meta": {
+      "allow_owner": false,
+      "allow_admin": false
+    }
+  },
+  {
+    "address": "module.azure_iam.azurerm_role_assignment.persona_groups[\"auditor\"]",
+    "resource_type": "azurerm_role_assignment",
+    "values": {
+      "condition": "",
+      "condition_version": "",
+      "delegated_managed_identity_resource_id": "",
+      "description": "",
+      "id": "/subscriptions/c39ffe15-279e-4da2-b993-6931c591eeec/resourceGroups/rg-iam-sandbox/providers/Microsoft.Authorization/roleAssignments/8e386da2-f5c5-6a79-3c5c-69adbbb321ca",
+      "name": "8e386da2-f5c5-6a79-3c5c-69adbbb321ca",
+      "principal_id": "32f2cd6d-ddad-4fa0-aa6b-43a290bbae3d",
+      "principal_type": "Group",
+      "role_definition_id": "/subscriptions/c39ffe15-279e-4da2-b993-6931c591eeec/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7",
+      "role_definition_name": "Reader",
+      "scope": "/subscriptions/c39ffe15-279e-4da2-b993-6931c591eeec/resourceGroups/rg-iam-sandbox",
+      "skip_service_principal_aad_check": null,
+      "timeouts": null
+    },
+    "meta": {
+      "allow_owner": false,
+      "allow_admin": false
+    }
+  },
+  {
+    "address": "module.azure_iam.azurerm_role_assignment.persona_groups[\"cloud_engineer\"]",
+    "resource_type": "azurerm_role_assignment",
+    "values": {
+      "condition": "",
+      "condition_version": "",
+      "delegated_managed_identity_resource_id": "",
+      "description": "",
+      "id": "/subscriptions/c39ffe15-279e-4da2-b993-6931c591eeec/resourceGroups/rg-iam-sandbox/providers/Microsoft.Authorization/roleAssignments/995ac368-495a-23e9-50b6-aa89e54a3560",
+      "name": "995ac368-495a-23e9-50b6-aa89e54a3560",
+      "principal_id": "d8fb181c-5aa2-4ebb-8c77-a21e68935464",
+      "principal_type": "Group",
+      "role_definition_id": "/subscriptions/c39ffe15-279e-4da2-b993-6931c591eeec/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c",
+      "role_definition_name": "Contributor",
+      "scope": "/subscriptions/c39ffe15-279e-4da2-b993-6931c591eeec/resourceGroups/rg-iam-sandbox",
+      "skip_service_principal_aad_check": null,
+      "timeouts": null
+    },
+    "meta": {
+      "allow_owner": false,
+      "allow_admin": false
+    }
+  },
+  {
+    "address": "module.azure_iam.azurerm_role_assignment.persona_groups[\"devsecops_engineer\"]",
+    "resource_type": "azurerm_role_assignment",
+    "values": {
+      "condition": "",
+      "condition_version": "",
+      "delegated_managed_identity_resource_id": "",
+      "description": "",
+      "id": "/subscriptions/c39ffe15-279e-4da2-b993-6931c591eeec/resourceGroups/rg-iam-sandbox/providers/Microsoft.Authorization/roleAssignments/8a2b9762-e6be-e27b-dc4c-ac27502d838f",
+      "name": "8a2b9762-e6be-e27b-dc4c-ac27502d838f",
+      "principal_id": "e4d4d252-aac2-41ea-bc87-fe8dea3bc6c8",
+      "principal_type": "Group",
+      "role_definition_id": "/subscriptions/c39ffe15-279e-4da2-b993-6931c591eeec/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c",
+      "role_definition_name": "Contributor",
+      "scope": "/subscriptions/c39ffe15-279e-4da2-b993-6931c591eeec/resourceGroups/rg-iam-sandbox",
+      "skip_service_principal_aad_check": null,
+      "timeouts": null
+    },
+    "meta": {
+      "allow_owner": false,
+      "allow_admin": false
+    }
+  },
+  {
+    "address": "module.azure_iam.azurerm_role_assignment.persona_groups[\"security_analyst\"]",
+    "resource_type": "azurerm_role_assignment",
+    "values": {
+      "condition": "",
+      "condition_version": "",
+      "delegated_managed_identity_resource_id": "",
+      "description": "",
+      "id": "/subscriptions/c39ffe15-279e-4da2-b993-6931c591eeec/resourceGroups/rg-iam-sandbox/providers/Microsoft.Authorization/roleAssignments/0fe6ec38-4ebb-c029-2bc1-71d8e3508789",
+      "name": "0fe6ec38-4ebb-c029-2bc1-71d8e3508789",
+      "principal_id": "855692ae-7ab8-4e39-95a5-8cd8ed85658a",
+      "principal_type": "Group",
+      "role_definition_id": "/subscriptions/c39ffe15-279e-4da2-b993-6931c591eeec/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7",
+      "role_definition_name": "Reader",
+      "scope": "/subscriptions/c39ffe15-279e-4da2-b993-6931c591eeec/resourceGroups/rg-iam-sandbox",
+      "skip_service_principal_aad_check": null,
+      "timeouts": null
+    },
+    "meta": {
+      "allow_owner": false,
+      "allow_admin": false
+    }
+  },
+  {
+    "address": "module.azure_iam.azurerm_role_assignment.sandbox_reader",
+    "resource_type": "azurerm_role_assignment",
+    "values": {
+      "condition": "",
+      "condition_version": "",
+      "delegated_managed_identity_resource_id": "",
+      "description": "",
+      "id": "/subscriptions/c39ffe15-279e-4da2-b993-6931c591eeec/resourceGroups/rg-iam-sandbox/providers/Microsoft.Authorization/roleAssignments/f916be02-0313-7205-0762-991665a193e4",
+      "name": "f916be02-0313-7205-0762-991665a193e4",
+      "principal_id": "0d33a51f-300b-495f-882c-401ea8c04703",
+      "principal_type": "User",
+      "role_definition_id": "/subscriptions/c39ffe15-279e-4da2-b993-6931c591eeec/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7",
+      "role_definition_name": "Reader",
+      "scope": "/subscriptions/c39ffe15-279e-4da2-b993-6931c591eeec/resourceGroups/rg-iam-sandbox",
+      "skip_service_principal_aad_check": null,
+      "timeouts": null
+    },
+    "meta": {
+      "allow_owner": false,
+      "allow_admin": false
+    }
+  }
+]

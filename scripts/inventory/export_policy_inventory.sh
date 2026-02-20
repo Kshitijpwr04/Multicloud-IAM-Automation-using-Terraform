@@ -10,7 +10,7 @@ mkdir -p "$OUT_DIR"
 pushd "$ENV_DIR" >/dev/null
 terraform plan -out "tfplan-${TS}" >/dev/null
 terraform show -json "tfplan-${TS}" > "../../${OUT_DIR}/tfplan-${TS}.json"
-python ../../scripts/policy_input_from_plan.py > "../../${OUT_DIR}/policy-input-${TS}.json"
+python3 ../../scripts/policy_input_from_plan.py > "../../${OUT_DIR}/policy-input-${TS}.json"
 popd >/dev/null
 
 echo "Wrote:"
