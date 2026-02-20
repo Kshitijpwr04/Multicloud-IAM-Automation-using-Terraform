@@ -1,0 +1,12 @@
+{
+  "azure_resource_group_id": {
+    "sensitive": false,
+    "type": "string",
+    "value": "/subscriptions/c39ffe15-279e-4da2-b993-6931c591eeec/resourceGroups/rg-iam-sandbox"
+  },
+  "azure_resource_group_name": {
+    "sensitive": false,
+    "type": "string",
+    "value": "rg-iam-sandbox"
+  }
+}
