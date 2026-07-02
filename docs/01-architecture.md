@@ -116,6 +116,16 @@ credentials. Azure has no such gate; it's always instantiated, and needs real cr
 (`az login` device-code auth, or a `terraform.tfvars` with real
 `azure_subscription_id`/`azure_tenant_id`) to actually plan against a live tenant.
 
+Because both `aws_iam` and `gcp_iam` use `count = var.enable_x ? 1 : 0`, any root-level output
+referencing them must index into them (`module.gcp_iam[0].attr`), not reference them directly.
+This was missed for both GCP outputs in `environments/sandbox/outputs.tf` until this rebuild
+pass — `terraform plan -target=module.gcp_iam` with `enable_gcp=true` had never actually been
+run before, and doing so reproduced a hard failure (`module.gcp_iam is tuple with 1 element —
+this value does not have any attributes`). Fixed by adding the `[0]` index; re-verified with a
+clean targeted plan (`7 to add, 0 to change, 0 to destroy`). `aws_iam` has the same `count`
+pattern but currently has no root output referencing it at all, so there's no equivalent bug
+there today — just a smaller gap (its `persona_role_arns` output isn't exposed at the root).
+
 ### Policy-as-code (`policy/`, `scripts/policy_input_from_plan.py`)
 `policy/rego/iam.rego` holds four `deny` rules (Azure `Owner`, AWS `AdministratorAccess`,
 `break_glass` via joiner, `break_glass` via mover), backed by `policy/rego/data.json` (env
@@ -156,7 +166,9 @@ get rediscovered from scratch later.
 - No Azure credential path in `policy-ci.yml`.
 - `export_privileged_report.sh`'s GCP resource-type mismatch (above).
 - AWS permission boundary is a placeholder (`Allow: *` on `*`), not real least-privilege.
-- GCP module is code-complete but never `plan`/`apply`-tested against a real project.
+- GCP module is not deployed against a real project (`gcp_project_id` is still a placeholder).
+  Its `terraform plan` path with `enable_gcp=true` is now verified clean as of this pass (see
+  above) — previously it would have actively failed, not just been untested.
 - `desired_memberships_by_persona` (in `environments/sandbox/main.tf`) is computed but not yet
   consumed by anything that reconciles actual group membership against it — it's exposed as a
   debug output today, not an enforcement mechanism.

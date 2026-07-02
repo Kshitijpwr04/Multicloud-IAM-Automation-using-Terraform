@@ -72,9 +72,14 @@ oversells its own project is worse than one with a visible roadmap.
   break-glass gets a short 900-second max session duration. The permission boundary is still a
   placeholder policy (`Allow: *` on `*`) — real least-privilege boundaries are not implemented.
 - **GCP module** (`modules/gcp-iam`): automation + CI/CD service accounts, persona-based project
-  IAM bindings via Google Groups. Code-complete and passes `terraform validate`, but gated off by
-  default (`enable_gcp = false`) and never `plan`/`apply`-tested against a real GCP project
-  (`gcp_project_id` still defaults to a placeholder).
+  IAM bindings via Google Groups. Gated off by default (`enable_gcp = false`), and
+  `gcp_project_id` still defaults to a placeholder, so it's not deployed against a real GCP
+  project. It's more than "untested," though: `terraform plan -target=module.gcp_iam` with
+  `enable_gcp=true` had never actually been run before this rebuild pass, and doing so for the
+  first time reproduced a real failure — two root outputs referenced `module.gcp_iam.<attr>`
+  without the `[0]` index required by its `count`-based instantiation, so enabling it would have
+  hard-failed on first use. Fixed and verified (`Plan: 7 to add, 0 to change, 0 to destroy`, no
+  errors) as part of this pass; the module itself needed no changes.
 - **Identity source of truth**: `identities/users.yaml`, `identities/personas.yaml`.
 - **Request validation**: `scripts/validate_requests.py` — enforces persona validity, blocks
   `break_glass` via joiner/mover, checks joiner/leaver preconditions. Wired into CI
