@@ -35,6 +35,29 @@ test_no_deny_for_azure_reader {
 	}
 }
 
+test_deny_owner_grant_that_only_looks_like_break_glass_by_address {
+	# A resource crafted/renamed to *look* like the real break_glass grant by putting
+	# "break_glass" somewhere in its address, without actually being it. This proves
+	# the deny rule still fires as long as meta.allow_owner correctly reflects "this
+	# isn't really break_glass" -- which is exactly what the tightened, anchored
+	# is_break_glass check in scripts/policy_input_from_plan.py now computes for an
+	# address like this (verified separately: it no longer matches a bare "break_glass"
+	# substring, only the exact resource construct the real break_glass grant uses).
+	#
+	# Note what this test does and doesn't prove: it proves the Rego layer correctly
+	# denies when handed a forged-looking address with correct (false) meta -- Rego
+	# never inspects the address itself for this decision, only meta.allow_owner. It
+	# does NOT exercise policy_input_from_plan.py's address-matching logic directly;
+	# that logic lives in Python and would need its own Python-level test to be
+	# proven spoof-resistant on its own, not just trusted here.
+	deny["Azure role 'Owner' is not allowed (use break_glass process). Resource: module.azure_iam.azurerm_role_assignment.not_break_glass_at_all_but_named_to_slip_through"] with input as {
+		"address": "module.azure_iam.azurerm_role_assignment.not_break_glass_at_all_but_named_to_slip_through",
+		"resource_type": "azurerm_role_assignment",
+		"values": {"role_definition_name": "Owner"},
+		"meta": {"allow_owner": false, "allow_admin": false},
+	}
+}
+
 # ---- Rule: deny AWS AdministratorAccess ----
 
 test_deny_aws_admin_when_not_allowed {
