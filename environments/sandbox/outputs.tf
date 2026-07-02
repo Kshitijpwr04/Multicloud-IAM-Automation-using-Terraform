@@ -9,11 +9,11 @@ output "azure_resource_group_id" {
 
 # GCP Outputs (Phase 6)
 output "gcp_automation_sa_email" {
-  value = var.enable_gcp ? module.gcp_iam.automation_service_account_email : null
+  value = var.enable_gcp ? module.gcp_iam[0].automation_service_account_email : null
 }
 
 output "gcp_cicd_sa_email" {
-  value = var.enable_gcp ? module.gcp_iam.cicd_service_account_email : null
+  value = var.enable_gcp ? module.gcp_iam[0].cicd_service_account_email : null
 }
 
 # Phase 7 Debug Outputs
