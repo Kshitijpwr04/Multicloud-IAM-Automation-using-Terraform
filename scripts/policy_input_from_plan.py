@@ -26,14 +26,19 @@ def main():
 
         # Normalize only the IAM-ish resources we care about
         if rtype in ("azurerm_role_assignment", "aws_iam_role_policy_attachment"):
+            # break_glass is the one persona allowed to hold Owner/AdministratorAccess --
+            # every module names its break_glass resources with "break_glass" in the
+            # Terraform address (module.azure_iam...break_glass_owner,
+            # aws_iam_role_policy_attachment.persona["break_glass::..."]), so that's a
+            # reliable signal without needing a separate allowlist file.
+            is_break_glass = "break_glass" in addr
             out.append({
                 "address": addr,
                 "resource_type": rtype,
                 "values": after,
                 "meta": {
-                    # can be wired later from env, labels, etc.
-                    "allow_owner": False,
-                    "allow_admin": False
+                    "allow_owner": is_break_glass,
+                    "allow_admin": is_break_glass
                 }
             })
 
