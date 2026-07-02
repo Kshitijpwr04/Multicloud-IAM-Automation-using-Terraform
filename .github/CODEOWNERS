@@ -1,0 +1,13 @@
+# Default owners (optional)
+* @Kshitijpwr04
+
+# Access request flows must be reviewed by IAM owners
+/identities/access-requests/ @Kshitijpwr04
+
+# Identity registry changes are high risk
+/identities/users.yaml @Kshitijpwr04
+/identities/personas.yaml @Kshitijpwr04
+
+# Terraform changes require infra review (you can add a second reviewer later)
+/modules/ @Kshitijpwr04
+/environments/ @Kshitijpwr04
