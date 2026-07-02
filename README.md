@@ -91,6 +91,13 @@ oversells its own project is worse than one with a visible roadmap.
 - **GitOps governance**: `.github/CODEOWNERS` and a PR template requiring the JML checklist.
 
 ### Roadmap / not yet implemented
+- **JML requests are validated but not enforced against live cloud access yet.** Merging a
+  joiner/mover/leaver request only updates `identities/users.yaml` — no Terraform resource in
+  any of the three modules manages per-user group/role membership, so a leaver merge does not
+  revoke any real access anywhere. See [`docs/03-joiner-mover-leaver.md`](docs/03-joiner-mover-leaver.md)
+  for the full detail. This is the most consequential gap in the project today — closing it
+  (reconciling `desired_memberships_by_persona` into real membership) matters more than anything
+  else on this list.
 - Conftest test cases for the guardrail policies (the part that makes policy-as-code credible).
 - An Azure credential path for `policy-ci.yml` (`azure/login` or `ARM_*` secrets) so the policy
   check's `terraform plan` step can actually complete on a GitHub Actions runner.
@@ -101,10 +108,17 @@ oversells its own project is worse than one with a visible roadmap.
 
 ### Demo / deployment status
 Azure is deployed and validated against a live tenant (`terraform plan`/`apply` have been run
-against a real, low-privilege sandbox subscription). AWS and GCP modules are implemented and
-validated via `terraform validate`/`plan` with placeholder credentials, but not deployed against
-live AWS/GCP accounts. This is a deliberate scope decision, not an oversight — see
-[`docs/07-demo-runbook.md`](docs/07-demo-runbook.md) (to be filled in) for how to reproduce it.
+against a real, low-privilege sandbox subscription) — but only the group/role *scaffolding*:
+verified directly from committed plan evidence (`evidence/inventory/tfplan-20260220-170538.json`),
+the only resources ever actually applied are one resource group, six role assignments, and five
+Entra ID groups (one per persona, including `break_glass`'s). No user was ever added to or
+removed from a persona group by Terraform, because — per the JML gap above — no resource for
+that exists in the codebase yet. "Live and tested" means the scaffolding provisions correctly
+against a real tenant, not that end-to-end access provisioning has been demonstrated. AWS and
+GCP modules are implemented and validated via `terraform validate`/`plan` with placeholder
+credentials, but not deployed against live AWS/GCP accounts. This is a deliberate scope
+decision, not an oversight — see [`docs/07-demo-runbook.md`](docs/07-demo-runbook.md) (to be
+filled in) for how to reproduce it.
 
 ## How to run it locally
 
