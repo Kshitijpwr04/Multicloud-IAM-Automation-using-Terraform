@@ -14,17 +14,23 @@ Treat this as a **refactor-and-complete** pass, not a rewrite.
 
 ## Phase 0 — Security & hygiene (do this before anything else, ~30 min)
 
-- [ ] Remove hardcoded `azure_subscription_id` and `azure_tenant_id` defaults from
+- [x] Remove hardcoded `azure_subscription_id` and `azure_tenant_id` defaults from
       `environments/sandbox/variables.tf`. Replace with no default (required var) and
       document that real values go in a local `terraform.tfvars` file.
-- [ ] Add `terraform.tfvars` and `*.auto.tfvars` to `.gitignore` (currently missing).
-- [ ] Check git history for whether those real IDs were committed in earlier commits —
-      if so, note it (rotating/regenerating isn't usually necessary for tenant/sub IDs,
-      but it's worth knowing what's exposed).
-- [ ] Fix `scripts/inventory/export_policy_inventory.sh` — it calls
-      `scripts/policy_input_from_plan.py`, which does not exist. Either write that script
-      (converts `terraform show -json` output into OPA input format) or update the shell
-      script to reflect what actually generates `policy-input-*.json`.
+- [x] Add `terraform.tfvars` and `*.auto.tfvars` to `.gitignore` (currently missing).
+      Also added patterns for local `tfplan*`/`tfstate.json`/`policy-input.json` artifacts
+      found littering `environments/sandbox/` untracked, and deleted the stray copies.
+- [x] Check git history for whether those real IDs were committed in earlier commits —
+      confirmed: introduced at commit `b02b597` and present in every commit since, plus
+      embedded in ~18 already-committed evidence JSON files under `evidence/demo/` and
+      `evidence/inventory/`. Not rotating (not usually necessary for sandbox tenant/sub IDs);
+      regenerating the evidence artifacts is deferred to Phase 6.
+- [x] Fix `scripts/inventory/export_policy_inventory.sh` — it was calling
+      `scripts/policy_input_from_plan.py` with no argument, which hardcoded reading a plan
+      file literally named `tfplan`, while the shell script generates a timestamped
+      `tfplan-${TS}`. Fixed by having `policy_input_from_plan.py` accept an explicit
+      plan-JSON path argument, and the shell script now passes the timestamped path it
+      just generated.
 
 ## Phase 1 — Ground the docs in reality (~1–2 hrs)
 

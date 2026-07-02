@@ -32,20 +32,37 @@ GitHub Actions.
 
 ## Current status (read `IAM_Project_Rebuild_Plan.md` in this repo root for full detail)
 
-As of the last audit:
+As of Phase 0 completion (2026-07-02):
 - **Solid and working**: Azure module (Entra ID groups, RBAC, break-glass isolation),
-  AWS module (roles + policy attachment, though permission boundary is a placeholder),
-  `identities/*.yaml`, `scripts/validate_requests.py`, evidence-export shell scripts,
-  the CI validation workflow.
-- **Broken / needs fixing**: `modules/gcp-iam` is empty but referenced by
-  `environments/sandbox/main.tf` (terraform plan currently fails). Real Azure
-  subscription/tenant IDs are hardcoded as defaults in `environments/sandbox/variables.tf`
-  (security hygiene issue — fix before anything else). `scripts/inventory/export_policy_inventory.sh`
-  calls `scripts/policy_input_from_plan.py`, which doesn't exist.
-- **Not yet implemented**: `policy/opa/` and `policy/conftest/` are empty — no actual
-  policy-as-code exists yet despite being a core part of the project's value proposition.
-  `.github/CODEOWNERS` and PR template don't exist. All files in `/docs` are empty stubs.
-  `environments/dev` and `environments/prod` are empty — only `sandbox` is populated.
+  AWS module (roles + policy attachment; break-glass gets a short 900s session duration;
+  permission boundary is still a placeholder), GCP module (service accounts + persona-based
+  `google_project_iam_member` bindings — at code parity with aws-iam/azure-iam, but gated
+  off by default via `enable_gcp` and not yet validated against a real GCP project — still
+  uses a `CHANGE_ME_GCP_PROJECT_ID` placeholder), `identities/*.yaml`,
+  `scripts/validate_requests.py` (break_glass blocked on both joiner and mover paths),
+  evidence-export shell scripts, the CI validation workflow, `.github/CODEOWNERS` and PR
+  template.
+- **Fixed this session (Phase 0)**: hardcoded real-looking Azure subscription/tenant ID
+  defaults removed from `environments/sandbox/variables.tf` (now required vars, no default —
+  set via a local, gitignored `terraform.tfvars`). `.gitignore` now covers
+  `terraform.tfvars`/`*.auto.tfvars` and local plan/state artifacts (`tfplan*`,
+  `tfstate.json`, `policy-input.json`). `scripts/policy_input_from_plan.py` now accepts an
+  explicit plan-JSON path so `scripts/inventory/export_policy_inventory.sh` no longer silently
+  reads stale plan data.
+  **Known exposure, not remediated**: those two real-looking IDs are still present in git
+  history (introduced at commit `b02b597`) and embedded in ~18 already-committed evidence
+  JSON files under `evidence/demo/` and `evidence/inventory/`. Rotating a sandbox
+  tenant/subscription ID usually isn't necessary — flagging for awareness. Regenerating the
+  evidence artifacts is Phase 6 work.
+- **Partially implemented**: `policy/rego/iam.rego` + `data.json` + `break-glass-allowlist.json`
+  already implement real guardrail rules (deny Azure `Owner`, deny AWS `AdministratorAccess`,
+  deny `break_glass` via joiner/mover) and `.github/workflows/policy-ci.yml` already runs them
+  via `scripts/run_policy_checks.sh` + conftest in CI. Still missing: `policy/opa/` and
+  `policy/conftest/` are empty (`.gitkeep` only) — no Conftest *test cases* proving the
+  guardrails actually catch violations yet (the "tests are what make this credible" part of
+  Phase 3).
+- **Not yet implemented**: All files in `/docs` are empty stubs. `environments/dev` and
+  `environments/prod` are empty — only `sandbox` is populated.
 
 **Work through `IAM_Project_Rebuild_Plan.md` phase by phase, in order.** Don't skip Phase 0
 (security hygiene). Update the checkboxes in that file as phases complete, and update the
