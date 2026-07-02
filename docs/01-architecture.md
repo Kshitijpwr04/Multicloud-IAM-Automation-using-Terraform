@@ -70,15 +70,20 @@ end state; gaps are called out inline rather than left implicit.
 - **Git is the control plane.** Every access change is a PR against
   `identities/access-requests/{joiner,mover,leaver}/`, and it's rejected by CI before a human
   ever has to review it if it's structurally wrong (unknown persona, duplicate joiner, etc.).
-- **Break-glass is isolated at every layer**, not just documented as a rule:
-  - In Terraform: Azure's break-glass role assignment is a separate resource from the
-    per-persona `for_each` loop (`modules/azure-iam/main.tf`), and AWS's break-glass role gets
-    a materially different (short) session duration rather than just a different policy.
-  - In request validation: `scripts/validate_requests.py` hard-fails any joiner/mover request
-    naming `break_glass`.
-  - In policy-as-code: `policy/rego/iam.rego` has the same rule, evaluated independently
-    against the Terraform plan — a second, structurally different check on the same invariant,
-    not just the same check run twice.
+- **Break-glass is isolated in Terraform**, not just documented as a rule: Azure's break-glass
+  role assignment is a separate resource from the per-persona `for_each` loop
+  (`modules/azure-iam/main.tf`), and AWS's break-glass role gets a materially different (short)
+  session duration rather than just a different policy.
+  In request validation and policy-as-code, the picture is more mixed than it looks at first —
+  see [`docs/02-personas-rbac-model.md`](02-personas-rbac-model.md#break-glass-isolation-whats-actually-live-vs-designed-but-dormant)
+  for the verified detail: `scripts/validate_requests.py` does currently reject `break_glass`
+  joiner/mover requests, but via its generic "unknown persona" check (a side effect of
+  `break_glass` being absent from `personas.yaml`), not via the dedicated `if persona ==
+  "break_glass"` line, which is unreachable dead code. And `policy/rego/iam.rego`'s two rules
+  written specifically to deny `break_glass` via joiner/mover are never actually invoked — no
+  script in this repo converts an access-request YAML into the `kind: "access_request"` JSON
+  shape those rules expect. The Owner/AdministratorAccess Rego rules *are* live and would
+  independently catch a break_glass-shaped over-grant, just not by checking the persona name.
 - **Evidence generation is a first-class concern, not an afterthought.** The
   `scripts/inventory/*.sh` scripts exist specifically so that "prove what changed and when" is a
   command to run, not a forensic exercise.
@@ -145,6 +150,9 @@ get rediscovered from scratch later.
 
 ## Known gaps (see README roadmap for the full list)
 - No Conftest test suite for `policy/rego/iam.rego`.
+- `policy/rego/iam.rego`'s two break_glass-via-joiner/mover rules are never invoked in practice
+  — no script produces the `kind: "access_request"` input shape they expect (see
+  [`docs/02`](02-personas-rbac-model.md#break-glass-isolation-whats-actually-live-vs-designed-but-dormant)).
 - No Azure credential path in `policy-ci.yml`.
 - `export_privileged_report.sh`'s GCP resource-type mismatch (above).
 - AWS permission boundary is a placeholder (`Allow: *` on `*`), not real least-privilege.
