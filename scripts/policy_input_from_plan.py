@@ -4,8 +4,16 @@ def run(cmd):
     return subprocess.check_output(cmd, text=True)
 
 def main():
-    # Expect caller to create plan file: tfplan
-    plan_json = run(["terraform", "show", "-json", "tfplan"])
+    # Accept either a pre-rendered `terraform show -json` output file
+    # (path ending in .json) or a raw plan file to render ourselves.
+    # Defaults to the raw plan file "tfplan" for backward compatibility
+    # with scripts/run_policy_checks.sh, which passes no argument.
+    plan_path = sys.argv[1] if len(sys.argv) > 1 else "tfplan"
+
+    if plan_path.endswith(".json"):
+        plan_json = pathlib.Path(plan_path).read_text()
+    else:
+        plan_json = run(["terraform", "show", "-json", plan_path])
     plan = json.loads(plan_json)
 
     out = []
