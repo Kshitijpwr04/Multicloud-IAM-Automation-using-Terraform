@@ -1,0 +1,6 @@
+{
+  "env": "sandbox",
+  "allowed_azure_roles": ["reader", "contributor"],
+  "allow_owner": false,
+  "allow_admin": false
+}
