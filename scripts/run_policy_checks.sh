@@ -19,5 +19,9 @@ if ! command -v conftest >/dev/null 2>&1; then
   exit 2
 fi
 
-# Run policy checks
-conftest test policy-input.json -p ../../policy/rego --data "$DATA_FILE"
+# Run policy checks. --all-namespaces is required: iam.rego declares
+# `package iam.guardrails`, not conftest's default `main` namespace, and
+# without this flag conftest silently evaluates zero rules and exits 0
+# regardless of input -- verified by reproducing this exact invocation
+# against a real violation and observing "0 tests... exit code: 0".
+conftest test policy-input.json -p ../../policy/rego --data "$DATA_FILE" --all-namespaces
