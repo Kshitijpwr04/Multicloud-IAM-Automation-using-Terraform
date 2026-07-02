@@ -73,6 +73,9 @@ def main():
             persona = str(user["persona"])
             if persona not in persona_keys:
                 fail(f"{f}: unknown persona '{persona}'. Valid: {sorted(persona_keys)}")
+            # v1 guardrail: break_glass cannot be assigned via joiner request
+            if persona == "break_glass":
+                fail(f"{f}: joiner cannot request break_glass. Use a dedicated emergency process.")
             if email in users_by_email:
                 fail(f"{f}: joiner user already exists in users.yaml: {email}")
 
