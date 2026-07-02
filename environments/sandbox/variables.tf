@@ -11,13 +11,15 @@ variable "resource_group_name" {
 }
 
 variable "azure_subscription_id" {
-  type    = string
-  default = "c39ffe15-279e-4da2-b993-6931c591eeec"
+  type        = string
+  description = "Azure subscription ID for the sandbox environment. Set via a local, gitignored terraform.tfvars — do not default this to a real value."
 }
 
+# Not currently passed to any provider (msgraph auth uses az login / device
+# code in this devcontainer) — reserved for when Azure AD app auth is added.
 variable "azure_tenant_id" {
-  type    = string
-  default = "028eb7df-cb19-417e-84ad-d40af9d0e53f"
+  type        = string
+  description = "Azure tenant ID for the sandbox environment. Set via a local, gitignored terraform.tfvars — do not default this to a real value."
 }
 
 variable "aws_region" {
