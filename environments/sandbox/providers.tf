@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.5.0"
+  required_version = ">= 1.6.0"
 
   required_providers {
     azurerm = {
@@ -14,7 +14,6 @@ terraform {
       source  = "hashicorp/google"
       version = "~> 5.0"
     }
-    #4.1 enable us to add entra users and groups
     msgraph = {
       source  = "microsoft/msgraph"
       version = "~> 0.3"
@@ -22,23 +21,35 @@ terraform {
   }
 }
 
-# Azure: uses Azure CLI auth (since you logged in with `az login`)
+# Azure
 provider "azurerm" {
   features {}
-
   subscription_id = var.azure_subscription_id
-  tenant_id       = var.azure_tenant_id
 }
 
-# AWS: stub provider for Phase 2 validation (no resources yet)
+# Microsoft Graph (Entra)
+provider "msgraph" {
+  # Uses az login / device code auth in this devcontainer environment
+}
+
+# AWS (optional/aliased). Used only when enable_aws=true and module is instantiated.
 provider "aws" {
+  alias  = "optional"
   region = var.aws_region
+
+  # Placeholder creds so validate/plan can run without real AWS credentials.
+  access_key = var.aws_access_key_id
+  secret_key = var.aws_secret_access_key
+
+  skip_credentials_validation = true
+  skip_metadata_api_check     = true
+  skip_requesting_account_id  = true
 }
 
-# GCP: stub provider for Phase 2 validation (no resources yet)
+# GCP (optional/aliased). Used only when enable_gcp=true and module is instantiated.
 provider "google" {
-  project = var.gcp_project_id
-  region  = "us-central1"
+  alias        = "optional"
+  project      = var.gcp_project_id
+  region       = var.gcp_region
+  access_token = var.gcp_access_token
 }
-
-provider "msgraph" {}

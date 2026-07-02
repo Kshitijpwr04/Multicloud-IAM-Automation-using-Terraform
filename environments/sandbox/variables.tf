@@ -49,3 +49,41 @@ variable "gcp_name_prefix" {
   description = "Prefix for GCP IAM objects (service accounts)"
   default     = "iam"
 }
+variable "enable_aws" {
+  type    = bool
+  default = false
+}
+
+variable "enable_gcp" {
+  type    = bool
+  default = false
+}
+# --- Optional provider placeholders (allow validate/plan without real creds) ---
+
+# AWS
+variable "aws_access_key_id" {
+  type        = string
+  description = "Placeholder AWS access key for optional provider (override with real creds when enabling AWS)"
+  default     = "DUMMY_ACCESS_KEY"
+}
+
+variable "aws_secret_access_key" {
+  type        = string
+  description = "Placeholder AWS secret key for optional provider (override with real creds when enabling AWS)"
+  default     = "DUMMY_SECRET_KEY"
+  sensitive   = true
+}
+
+# GCP
+variable "gcp_region" {
+  type        = string
+  description = "GCP region for optional provider"
+  default     = "us-central1"
+}
+
+variable "gcp_access_token" {
+  type        = string
+  description = "Placeholder GCP access token for optional provider (override with real token/ADC when enabling GCP)"
+  default     = "DUMMY_GCP_TOKEN"
+  sensitive   = true
+}
