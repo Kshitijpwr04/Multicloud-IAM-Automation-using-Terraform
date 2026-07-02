@@ -82,19 +82,30 @@ actually doing the work today:
    and `.github/` trees for any producer of `kind`-shaped input: none exists. These two rules
    are dormant, not dead in the same sense as (1) — they're reachable in principle, just never
    invoked with real input.
-3. The other two rules in `iam.rego` (deny Azure `Owner`, deny AWS `AdministratorAccess`) *are*
-   live — their input shape matches what `policy_input_from_plan.py` actually produces, so they
-   would independently catch a `break_glass`-style over-grant surfacing as a Terraform-plan
-   change, even without referencing the persona name at all.
+3. The other two rules in `iam.rego` (deny Azure `Owner`, deny AWS `AdministratorAccess`) have
+   the right input shape — but until this Phase 3 pass, they weren't actually being evaluated
+   either, for a completely separate reason: `scripts/run_policy_checks.sh`'s `conftest test`
+   invocation never specified `--all-namespaces`, and conftest defaults to namespace `main` while
+   `iam.rego` declares `package iam.guardrails`. Without the flag, conftest silently evaluates
+   zero rules and exits 0 regardless of input — confirmed by reproducing the exact invocation
+   against real data containing an actual `Owner` grant and observing `0 tests... exit code: 0`.
+   Fixed by adding `--all-namespaces`. Fixing that alone then immediately false-positived on the
+   real, legitimate `break_glass` → `Owner` grant (nothing computed `allow_owner`/`allow_admin`
+   per-persona) — also fixed, in `scripts/policy_input_from_plan.py`, by checking whether the
+   resource address contains `break_glass`.
 
-Net effect: today, break_glass protection rests on one live mechanism (the accidental
-"unknown persona" rejection) plus one structurally-independent, genuinely-live backstop (the
-Owner/AdministratorAccess role-level denies, which don't need to know about personas at all to
-catch a break_glass-shaped over-grant). The two rules that were clearly *designed* to be a
-second, request-shaped check on the persona name specifically are present in the code but never
-exercised. This is worth fixing (add an access-request → JSON conversion step, analogous to
-`policy_input_from_plan.py`, and wire it into `run_policy_checks.sh` or a new script) rather than
-just documented — tracked on the roadmap.
+Net effect, as of this pass: break_glass protection rests on one accidentally-live mechanism
+(the "unknown persona" rejection) plus one now-genuinely-live, structurally-independent backstop
+(the Owner/AdministratorAccess role-level denies — which don't need to know about personas at
+all, and are now both actually evaluated in CI's invocation and correctly exception the one
+legitimate break_glass grant). The two rules that were clearly *designed* to be a second,
+request-shaped check on the persona name specifically are still present in the code but never
+exercised — no script converts an access-request YAML into the `kind: "access_request"` shape
+they expect. `policy/rego/iam_test.rego` proves this dormancy directly, against real captured
+pipeline output, rather than just asserting it. Building that producer (an access-request → JSON
+conversion step, analogous to `policy_input_from_plan.py`, wired into `run_policy_checks.sh` or
+a new script) remains a real feature gap, not something a test suite closes — tracked on the
+roadmap.
 
 It's also implemented differently in the Terraform modules themselves, not just gated by
 convention: Azure's break-glass role assignment (`modules/azure-iam/main.tf`) is excluded from

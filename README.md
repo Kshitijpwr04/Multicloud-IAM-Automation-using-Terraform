@@ -86,13 +86,21 @@ oversells its own project is worse than one with a visible roadmap.
   (`requests-ci.yml`).
 - **Evidence export**: `scripts/inventory/*.sh` generate Terraform output/plan/privileged-access
   JSON into `evidence/`.
-- **Policy-as-code (partial)**: `policy/rego/iam.rego` implements the same guardrails as the
-  Python validator, but evaluated against the Terraform plan JSON, and it's wired into CI
-  (`policy-ci.yml` runs it via `conftest`). What's missing: `policy/opa/` and `policy/conftest/`
-  are still empty — there's no test suite proving the Rego rules actually catch violations.
+- **Policy-as-code**: `policy/rego/iam.rego` implements the same guardrails as the Python
+  validator, evaluated against the Terraform plan JSON, with an 11-test suite
+  (`policy/rego/iam_test.rego`) proving the rules catch real violations — including a test that
+  proves the two break_glass-via-joiner/mover rules are *dormant* (no script produces the input
+  shape they expect), rather than just claiming it. Two real bugs were found and fixed getting
+  here, independent of the CI credential caveat below: `run_policy_checks.sh`'s `conftest`
+  invocation was missing `--all-namespaces`, so it silently evaluated zero rules and always
+  exited 0 — the policy check had been a no-op since it was written; and fixing that alone
+  immediately false-positived on the real, legitimate `break_glass` → `Owner` grant, now fixed by
+  computing `allow_owner`/`allow_admin` from the resource address in
+  `policy_input_from_plan.py`. Full detail in [`docs/01`](docs/01-architecture.md).
   *(Caveat: `policy-ci.yml` has no Azure authentication step — no `azure/login`, no `ARM_*`
   credentials — so its `terraform plan` step has no credential path on a fresh GitHub Actions
-  runner and hasn't been verified to pass end-to-end in CI; this predates this rebuild pass.)*
+  runner and hasn't been verified to pass end-to-end in CI; this predates this rebuild pass, and
+  is the one remaining piece of "a violating PR fails automatically" not achieved by this pass.)*
 - **GitOps governance**: `.github/CODEOWNERS` and a PR template requiring the JML checklist.
 
 ### Roadmap / not yet implemented
@@ -103,9 +111,12 @@ oversells its own project is worse than one with a visible roadmap.
   for the full detail. This is the most consequential gap in the project today — closing it
   (reconciling `desired_memberships_by_persona` into real membership) matters more than anything
   else on this list.
-- Conftest test cases for the guardrail policies (the part that makes policy-as-code credible).
+- An access-request → JSON conversion step (analogous to `policy_input_from_plan.py`) so the
+  break_glass-via-joiner/mover Rego rules stop being dormant and actually evaluate real requests.
 - An Azure credential path for `policy-ci.yml` (`azure/login` or `ARM_*` secrets) so the policy
-  check's `terraform plan` step can actually complete on a GitHub Actions runner.
+  check's `terraform plan` step can actually complete on a GitHub Actions runner — the one
+  remaining blocker to "a violating PR fails automatically" now that the namespace bug and
+  break-glass false-positive are fixed.
 - Real AWS permission boundaries (currently a permissive placeholder).
 - A live deployment story for AWS/GCP — see the demo strategy note below.
 - `environments/dev` and `environments/prod` are empty; only `sandbox` is populated.
@@ -149,10 +160,15 @@ terraform plan
 #    Must be run from inside environments/sandbox -- the script assumes that cwd, it doesn't
 #    cd there itself.
 bash ../../scripts/run_policy_checks.sh sandbox
+
+# 5. Run the Rego unit tests directly (no Terraform plan or cloud credentials needed --
+#    these mock their own input)
+conftest verify -p policy/rego
 ```
 
-Note: step 4 currently fails past the `terraform plan` stage without live Azure credentials —
-see the policy-as-code caveat above. Verified by actually running it, not assumed.
+Note: step 4 currently fails at the `terraform plan` stage without live Azure credentials — see
+the policy-as-code caveat above. Verified by actually running it, not assumed. Step 5 (the test
+suite) runs standalone and doesn't depend on step 4 completing.
 
 ## Repository layout
 

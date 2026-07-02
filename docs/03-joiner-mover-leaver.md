@@ -91,11 +91,16 @@ The Rego policy has rules that mirror the Python validator's `break_glass` check
 "access_request"`, `request_type == "joiner"`/`"mover"`, persona/new_persona ==
 `"break_glass"`) — these are intended as an independent, request-shaped backstop. In practice
 they are never invoked: nothing in this repo's CI or scripts converts an access-request YAML
-file into the JSON shape those rules expect. `policy/rego/iam.rego`'s other two rules (deny
-Azure `Owner`, deny AWS `AdministratorAccess`) *are* live, but they operate on Terraform plan
-output, not on the request YAML — so they'd only catch a break_glass-shaped over-grant if and
-when it showed up in a real `terraform plan`, not at request-review time. Full detail and the
-verification trail in [`docs/02`](02-personas-rbac-model.md#break-glass-isolation-whats-actually-live-vs-designed-but-dormant).
+file into the JSON shape those rules expect — proven directly by a dormancy test in
+`policy/rego/iam_test.rego`, not just asserted. `policy/rego/iam.rego`'s other two rules (deny
+Azure `Owner`, deny AWS `AdministratorAccess`) operate on Terraform plan output, not the request
+YAML — so they'd only catch a break_glass-shaped over-grant if and when it showed up in a real
+`terraform plan`, not at request-review time. As of the Phase 3 policy-as-code pass, they're now
+genuinely live: `scripts/run_policy_checks.sh`'s `conftest` invocation was previously missing
+`--all-namespaces` and silently evaluated zero rules (fixed), and `scripts/policy_input_from_plan.py`
+now correctly exempts the legitimate `break_glass` grant instead of flagging it as a violation
+(also fixed). Full detail and the verification trail in
+[`docs/02`](02-personas-rbac-model.md#break-glass-isolation-whats-actually-live-vs-designed-but-dormant).
 
 ## What a break_glass request actually looks like today
 
