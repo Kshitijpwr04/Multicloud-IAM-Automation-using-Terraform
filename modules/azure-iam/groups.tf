@@ -16,8 +16,8 @@ resource "msgraph_resource" "persona_group" {
   url = "groups"
 
   body = {
-    displayName     = each.value
-    mailEnabled     = false
+    displayName = each.value
+    mailEnabled = false
     # must be unique; keep it simple + deterministic
     mailNickname    = replace(each.value, "-", "")
     securityEnabled = true

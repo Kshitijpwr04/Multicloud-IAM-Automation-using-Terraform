@@ -19,9 +19,11 @@ data "aws_iam_policy_document" "assume_role_trust" {
 resource "aws_iam_role" "persona" {
   for_each = var.persona_to_policy_arns
 
-  name                 = "${var.name_prefix}-${each.key}"
-  assume_role_policy   = data.aws_iam_policy_document.assume_role_trust.json
-  max_session_duration = var.max_session_duration_seconds
+  name               = "${var.name_prefix}-${each.key}"
+  assume_role_policy = data.aws_iam_policy_document.assume_role_trust.json
+  /* 5.3 max_session_duration = var.max_session_duration_seconds*/
+  #5.4
+  max_session_duration = each.key == "break_glass" ? var.break_glass_session_duration_seconds : var.max_session_duration_seconds
   permissions_boundary = local.effective_permission_boundary_arn
   tags = {
     Project = "Multicloud IAM Automation using Terraform"

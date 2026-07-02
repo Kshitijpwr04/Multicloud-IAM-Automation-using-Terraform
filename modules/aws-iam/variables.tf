@@ -16,7 +16,7 @@ variable "persona_to_policy_arns" {
   description = "Persona -> list of AWS managed policy ARNs"
 }
 
-5.3
+#5.3
 variable "use_permission_boundary" {
   type        = bool
   description = "Whether to apply a permission boundary to persona roles"
@@ -27,4 +27,10 @@ variable "permission_boundary_policy_arn" {
   type        = string
   description = "Existing IAM policy ARN to use as permission boundary (optional). If null, module creates a placeholder boundary policy."
   default     = null
+}
+#5.4
+variable "break_glass_session_duration_seconds" {
+  type        = number
+  description = "Max session duration for break_glass role (short by design)"
+  default     = 900
 }
