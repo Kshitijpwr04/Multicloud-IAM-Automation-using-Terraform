@@ -1,8 +1,8 @@
 personas:
   security_analyst:
-    description: "Resposible for Security handling of proejct"
+    description: "Responsible for security handling of the project"
     privilege_level: "High"
-    intent: "Has access on. aprivileged level for easier access and surveillance"
+    intent: "Has access to a privileged level for easier access and surveillance"
   
   cloud_engineer:
     description: "Builds and operates cloud infrastructure"
