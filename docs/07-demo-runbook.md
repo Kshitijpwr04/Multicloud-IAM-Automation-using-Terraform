@@ -29,13 +29,16 @@ python scripts/validate_requests.py
 (exit code 0)
 
 **Failure** looks like a specific, actionable reason and a non-zero exit — for example, this is
-what it printed earlier in this rebuild pass, before a stale example request was fixed
-(commit `7732c1f`):
+real output from temporarily pointing `MR-0001-example.yaml` at a user that doesn't exist in
+`users.yaml` (reverted immediately after capturing this):
 ```
-[FAIL] identities/access-requests/mover/MR-0001-example.yaml: mover user not found in users.yaml: kshitijpawar04@gmail.com
+[FAIL] identities/access-requests/mover/MR-0001-example.yaml: mover user not found in users.yaml: nonexistent.user@example.com
 ```
 (exit code 1). Every failure mode prints `[FAIL] <file>: <specific reason>` — there's no vague
-"validation failed" output.
+"validation failed" output. (`MR-0001-example.yaml` itself had a real version of this failure
+earlier in this rebuild pass — a stale example pointed at a real personal email instead of an
+`@example.com` placeholder, fixed in commit `7732c1f` — that failure isn't reproduced verbatim
+here since the exact original message contained that email.)
 
 ## 2. `terraform validate` across all three modules
 
