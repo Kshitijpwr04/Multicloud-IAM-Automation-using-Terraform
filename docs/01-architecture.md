@@ -111,9 +111,18 @@ Known gaps below).
 
 AWS and GCP module instantiation is gated by `enable_aws`/`enable_gcp` (both default `false`),
 with placeholder credentials (`DUMMY_ACCESS_KEY`, `DUMMY_GCP_TOKEN`, etc.) on aliased "optional"
-provider blocks — this is what lets `terraform validate`/`plan` succeed without real AWS/GCP
-credentials. Azure has no such gate; it's always instantiated, and needs real credentials
-(`az login` device-code auth, or a `terraform.tfvars` with real
+provider blocks — this is what lets `terraform validate` succeed without real AWS/GCP
+credentials for either, and lets `terraform plan` succeed without them for GCP specifically
+(verified: `enable_gcp=true` plans cleanly with a fake project ID and no live GCP auth at all).
+AWS's `plan` is not the same story: `modules/aws-iam/main.tf`'s
+`data "aws_caller_identity" "current" {}` makes a live STS API call to build the trust-policy
+ARN, which isn't covered by the provider's `skip_credentials_validation`/
+`skip_requesting_account_id` flags (those only suppress the *provider's* implicit account-ID
+lookup at init time, not an explicit `data` block elsewhere in the config) — so `terraform plan`
+with `enable_aws=true` and the placeholder credentials fails
+(`Error: reading STS Caller Identity ... InvalidClientTokenId`, exit code 1). Confirmed by
+running it, not assumed. Azure has no gate at all; it's always instantiated, and needs real
+credentials (`az login` device-code auth, or a `terraform.tfvars` with real
 `azure_subscription_id`/`azure_tenant_id`) to actually plan against a live tenant.
 
 Because both `aws_iam` and `gcp_iam` use `count = var.enable_x ? 1 : 0`, any root-level output
@@ -204,6 +213,11 @@ get rediscovered from scratch later.
 - GCP module is not deployed against a real project (`gcp_project_id` is still a placeholder).
   Its `terraform plan` path with `enable_gcp=true` is now verified clean as of this pass (see
   above) — previously it would have actively failed, not just been untested.
+- AWS's `terraform plan` (unlike GCP's) genuinely requires real AWS credentials — confirmed by
+  running it, not assumed. `data.aws_caller_identity.current` in `modules/aws-iam/main.tf` makes
+  a live STS call the placeholder credentials can't satisfy. Not treated as a bug (needing valid
+  STS access to build a real trust-policy ARN is reasonable), just documented precisely rather
+  than implying AWS and GCP validate the same way.
 - `desired_memberships_by_persona` (in `environments/sandbox/main.tf`) is computed but not yet
   consumed by anything that reconciles actual group membership against it — it's exposed as a
   debug output today, not an enforcement mechanism.

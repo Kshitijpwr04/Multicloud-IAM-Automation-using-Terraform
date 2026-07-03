@@ -71,6 +71,14 @@ oversells its own project is worse than one with a visible roadmap.
 - **AWS module** (`modules/aws-iam`): one IAM role per persona, managed-policy attachments,
   break-glass gets a short 900-second max session duration. The permission boundary is still a
   placeholder policy (`Allow: *` on `*`) — real least-privilege boundaries are not implemented.
+  `terraform validate` passes with the placeholder credentials, but `terraform plan` does not:
+  `data.aws_caller_identity.current` makes a live STS API call to build the trust-policy ARN,
+  which the `DUMMY_ACCESS_KEY`/`DUMMY_SECRET_KEY` placeholders can't satisfy (confirmed —
+  `terraform plan -target=module.aws_iam` with `enable_aws=true` fails with
+  `InvalidClientTokenId`, exit code 1). Unlike GCP, this isn't just untested; `plan` genuinely
+  requires real AWS credentials. Not treated as a bug to fix — needing valid STS access to build
+  a real trust-policy ARN is reasonable behavior, just worth stating precisely rather than
+  lumping AWS in with GCP's placeholder-clean-plan story.
 - **GCP module** (`modules/gcp-iam`): automation + CI/CD service accounts, persona-based project
   IAM bindings via Google Groups. Gated off by default (`enable_gcp = false`), and
   `gcp_project_id` still defaults to a placeholder, so it's not deployed against a real GCP
@@ -131,10 +139,13 @@ Entra ID groups (one per persona, including `break_glass`'s). No user was ever a
 removed from a persona group by Terraform, because — per the JML gap above — no resource for
 that exists in the codebase yet. "Live and tested" means the scaffolding provisions correctly
 against a real tenant, not that end-to-end access provisioning has been demonstrated. AWS and
-GCP modules are implemented and validated via `terraform validate`/`plan` with placeholder
-credentials, but not deployed against live AWS/GCP accounts. This is a deliberate scope
-decision, not an oversight — see [`docs/07-demo-runbook.md`](docs/07-demo-runbook.md) (to be
-filled in) for how to reproduce it.
+GCP modules are implemented, but not deployed against live AWS/GCP accounts — a deliberate scope
+decision, not an oversight. Validation depth differs between them, though: GCP's `terraform
+plan` succeeds cleanly with placeholder credentials (verified, `enable_gcp=true`: `7 to add, 0
+to change, 0 to destroy`, no errors); AWS's does not — `data.aws_caller_identity.current` needs
+a live STS call the placeholder credentials can't satisfy, so only `terraform validate` passes
+for AWS without real credentials. See [`docs/07-demo-runbook.md`](docs/07-demo-runbook.md) (to
+be filled in) for how to reproduce any of this.
 
 ## How to run it locally
 
