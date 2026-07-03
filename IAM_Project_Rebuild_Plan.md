@@ -88,7 +88,7 @@ Not deployed against a real GCP project — deliberate, per the Phase 5 demo str
 - [x] `pipelines/github-actions` — removed (provided no functional value; `docs/01` already
       documents the real CI/CD flow, and GitHub Actions only reads `.github/workflows/`).
 
-## Phase 5 — Decide the demo strategy (important, decide before Phase 6)
+## Phase 5 — Decide the demo strategy (important, decide before Phase 6) — confirmed, done
 
 You need a real answer to "does this actually deploy anywhere?" for the interview.
 Options, roughly in order of impressiveness vs. effort:
@@ -105,6 +105,18 @@ Options, roughly in order of impressiveness vs. effort:
 3. **Code-only everywhere**: weakest for interviews — avoid if you can help it.
 
 Recommend option 2 unless you're up for spinning up AWS/GCP sandboxes too.
+
+- [x] **Confirmed option 2**, consistently stated across README, `docs/01`, and (once filled in)
+      `docs/07`. One correction made during confirmation: this section's own wording ("AWS and
+      GCP ... validated via `terraform plan`/`validate`") isn't quite accurate for AWS. Verified
+      by running it: GCP's `terraform plan` succeeds cleanly with placeholder credentials
+      (`enable_gcp=true`: `7 to add, 0 to change, 0 to destroy`, no errors); AWS's does not —
+      `data.aws_caller_identity.current` makes a live STS call the placeholders can't satisfy,
+      so `terraform plan` with `enable_aws=true` fails (`InvalidClientTokenId`, exit code 1).
+      Only `terraform validate` is placeholder-clean for AWS. README and `docs/01` corrected to
+      state this precisely rather than lump AWS in with GCP's story. Not treated as a bug to fix
+      (needing real STS access for a real trust-policy ARN is reasonable) — a documentation
+      correction, not a code change.
 
 ## Phase 6 — Evidence & docs closeout (~1 hr)
 
