@@ -105,10 +105,13 @@ oversells its own project is worse than one with a visible roadmap.
   immediately false-positived on the real, legitimate `break_glass` → `Owner` grant, now fixed by
   computing `allow_owner`/`allow_admin` from the resource address in
   `policy_input_from_plan.py`. Full detail in [`docs/01`](docs/01-architecture.md).
-  *(Caveat: `policy-ci.yml` has no Azure authentication step — no `azure/login`, no `ARM_*`
-  credentials — so its `terraform plan` step has no credential path on a fresh GitHub Actions
-  runner and hasn't been verified to pass end-to-end in CI; this predates this rebuild pass, and
-  is the one remaining piece of "a violating PR fails automatically" not achieved by this pass.)*
+  *(Caveat: `policy-ci.yml` now has an OIDC-based `azure/login` step (client-id/tenant-id/
+  subscription-id from GitHub secrets, no long-lived client secret) wired in, but this has
+  **not been verified to pass in a real CI run** — the Azure AD app registration, federated
+  credential, RBAC scoping, and GitHub secrets it depends on are deliberately not provisioned
+  here (that's real Azure access, not something to generate unilaterally). See
+  [`docs/04`](docs/04-guardrails-policy-as-code.md) for the exact remaining setup and why this
+  is "wired in, not yet confirmed working" rather than "done.")*
 - **GitOps governance**: `.github/CODEOWNERS` and a PR template requiring the JML checklist.
 
 ### Roadmap / not yet implemented
@@ -121,10 +124,11 @@ oversells its own project is worse than one with a visible roadmap.
   else on this list.
 - An access-request → JSON conversion step (analogous to `policy_input_from_plan.py`) so the
   break_glass-via-joiner/mover Rego rules stop being dormant and actually evaluate real requests.
-- An Azure credential path for `policy-ci.yml` (`azure/login` or `ARM_*` secrets) so the policy
-  check's `terraform plan` step can actually complete on a GitHub Actions runner — the one
-  remaining blocker to "a violating PR fails automatically" now that the namespace bug and
-  break-glass false-positive are fixed.
+- Provision the Azure-side setup `policy-ci.yml`'s new `azure/login` step depends on (app
+  registration, federated credential, read-only RBAC scope, Graph API permissions, GitHub
+  secrets) and confirm it actually passes in a real CI run — the workflow YAML is wired in, but
+  unverified end-to-end. See [`docs/04`](docs/04-guardrails-policy-as-code.md) for the exact
+  steps.
 - Real AWS permission boundaries (currently a permissive placeholder).
 - A live deployment story for AWS/GCP — see the demo strategy note below.
 - `environments/dev` and `environments/prod` are empty; only `sandbox` is populated.
