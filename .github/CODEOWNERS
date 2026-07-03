@@ -11,3 +11,6 @@
 # Terraform changes require infra review (you can add a second reviewer later)
 /modules/ @Kshitijpwr04
 /environments/ @Kshitijpwr04
+
+# Policy-as-code guardrails are security-critical
+/policy/ @Kshitijpwr04
