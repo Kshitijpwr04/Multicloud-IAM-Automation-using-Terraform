@@ -1,0 +1,20 @@
+[
+  {
+    "cloud": "Azure",
+    "role": "Owner",
+    "principal": "aaaaaaaa-aaaa-aaaa-aaaa-000000000004",
+    "scope": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-iam-sandbox"
+  },
+  {
+    "cloud": "Azure",
+    "role": "Contributor",
+    "principal": "aaaaaaaa-aaaa-aaaa-aaaa-000000000010",
+    "scope": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-iam-sandbox"
+  },
+  {
+    "cloud": "Azure",
+    "role": "Contributor",
+    "principal": "aaaaaaaa-aaaa-aaaa-aaaa-000000000011",
+    "scope": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-iam-sandbox"
+  }
+]

@@ -18,8 +18,8 @@
       "timeouts": null
     },
     "meta": {
-      "allow_owner": false,
-      "allow_admin": false
+      "allow_owner": true,
+      "allow_admin": true
     }
   },
   {
