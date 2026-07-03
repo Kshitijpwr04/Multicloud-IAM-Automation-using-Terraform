@@ -7,6 +7,11 @@ output "azure_resource_group_id" {
   value = module.azure_iam.resource_group_id
 }
 
+# AWS Outputs
+output "aws_persona_role_arns" {
+  value = var.enable_aws ? module.aws_iam[0].persona_role_arns : null
+}
+
 # GCP Outputs (Phase 6)
 output "gcp_automation_sa_email" {
   value = var.enable_gcp ? module.gcp_iam[0].automation_service_account_email : null
