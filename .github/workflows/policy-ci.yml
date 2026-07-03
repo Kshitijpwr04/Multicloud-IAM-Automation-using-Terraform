@@ -8,6 +8,10 @@ on:
       - "policy/**"
       - "scripts/**"
 
+permissions:
+  id-token: write   # required for azure/login's OIDC token exchange
+  contents: read
+
 jobs:
   policy:
     runs-on: ubuntu-latest
@@ -16,6 +20,17 @@ jobs:
         working-directory: environments/sandbox
     steps:
       - uses: actions/checkout@v4
+
+      # OIDC/federated login -- no long-lived client secret. Requires an Azure AD
+      # app registration with a federated credential trusting this repo's
+      # pull_request workflow (see docs/04-guardrails-policy-as-code.md for the
+      # exact Azure-side setup this depends on -- it is NOT provisioned by this
+      # workflow, and this step will fail authentication until that setup exists).
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - uses: hashicorp/setup-terraform@v3
 
@@ -34,3 +49,5 @@ jobs:
         env:
           TF_VAR_enable_aws: "false"
           TF_VAR_enable_gcp: "false"
+          TF_VAR_azure_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          TF_VAR_azure_tenant_id: ${{ secrets.AZURE_TENANT_ID }}
