@@ -118,13 +118,27 @@ Recommend option 2 unless you're up for spinning up AWS/GCP sandboxes too.
       (needing real STS access for a real trust-policy ARN is reasonable) — a documentation
       correction, not a code change.
 
-## Phase 6 — Evidence & docs closeout (~1 hr)
+## Phase 6 — Evidence & docs closeout (~1 hr) — done
 
-- [ ] Regenerate `evidence/inventory` and `evidence/demo` artifacts once GCP module and
-      policy checks exist, so the sample evidence reflects the real, complete system.
-- [ ] Fill in `docs/04-guardrails-policy-as-code.md` and `docs/05-access-reviews-audit-evidence.md`
-      for real now that Phase 3 exists.
-- [ ] Fill in `docs/07-demo-runbook.md` — literal step-by-step "how to run this yourself."
+- [x] Regenerated `evidence/inventory` and `evidence/demo`. Honest about what could actually be
+      regenerated without live credentials (expired `az login` session, non-interactive
+      session): `tf-outputs-*.json` and `privileged-report-*.json` (the latter generated for the
+      first time ever, no prior file existed) are real, fresh reads of local Terraform state —
+      no live credentials needed for either. `policy-input-*.json` was regenerated with the
+      fixed converter but against the most recent *existing* plan snapshot, not a brand-new live
+      plan — clearly labeled as such, not presented as a fresh live regeneration. All three
+      scrubbed of real subscription/tenant IDs *before* being written into the repo, verified
+      clean with a repo-wide grep.
+- [x] Filled in `docs/04-guardrails-policy-as-code.md` and `docs/05-access-reviews-audit-evidence.md`.
+      docs/05 leads with an explicit audit-readiness caveat: this evidence proves what Terraform
+      applies, not who has real access, given the JML/leaver enforcement gap from Phase 1.
+- [x] Filled in `docs/07-demo-runbook.md` — 7 literal steps, every credential-free command
+      re-verified live while writing it, every known limitation cited by commit hash.
+- [x] (Beyond the original scope, found during Phase 6/closeout) Exposed `aws_iam`'s
+      `persona_role_arns` as a root output (the Phase 2 gap), and added an OIDC-based
+      `azure/login` step to `policy-ci.yml` — wired in, but explicitly **not verified to pass in
+      a real CI run**, since the Azure AD app registration/federated credential/RBAC scoping it
+      depends on is real Azure access this rebuild pass deliberately didn't provision.
 
 ## Phase 7 — Blog series (after the above)
 
