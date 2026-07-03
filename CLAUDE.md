@@ -27,42 +27,48 @@ platform across Azure, AWS, and GCP.
 ## Tech stack
 
 Terraform (azurerm ~>4.0, aws ~>5.0, google ~>5.0, msgraph ~>0.3), YAML, Python (validation
-scripts), OPA/Conftest (policy-as-code — see rebuild plan, this is currently unimplemented),
-GitHub Actions.
+scripts), OPA/Conftest (policy-as-code — implemented with a test suite as of Phase 3, see
+Current status below), GitHub Actions.
 
 ## Current status (read `IAM_Project_Rebuild_Plan.md` in this repo root for full detail)
 
-As of Phase 0 completion (2026-07-02):
-- **Solid and working**: Azure module (Entra ID groups, RBAC, break-glass isolation),
-  AWS module (roles + policy attachment; break-glass gets a short 900s session duration;
-  permission boundary is still a placeholder), GCP module (service accounts + persona-based
-  `google_project_iam_member` bindings — at code parity with aws-iam/azure-iam, but gated
-  off by default via `enable_gcp` and not yet validated against a real GCP project — still
-  uses a `CHANGE_ME_GCP_PROJECT_ID` placeholder), `identities/*.yaml`,
-  `scripts/validate_requests.py` (break_glass blocked on both joiner and mover paths),
-  evidence-export shell scripts, the CI validation workflow, `.github/CODEOWNERS` and PR
-  template.
-- **Fixed this session (Phase 0)**: hardcoded real-looking Azure subscription/tenant ID
-  defaults removed from `environments/sandbox/variables.tf` (now required vars, no default —
-  set via a local, gitignored `terraform.tfvars`). `.gitignore` now covers
-  `terraform.tfvars`/`*.auto.tfvars` and local plan/state artifacts (`tfplan*`,
-  `tfstate.json`, `policy-input.json`). `scripts/policy_input_from_plan.py` now accepts an
-  explicit plan-JSON path so `scripts/inventory/export_policy_inventory.sh` no longer silently
-  reads stale plan data.
-  **Known exposure, not remediated**: those two real-looking IDs are still present in git
-  history (introduced at commit `b02b597`) and embedded in ~18 already-committed evidence
-  JSON files under `evidence/demo/` and `evidence/inventory/`. Rotating a sandbox
-  tenant/subscription ID usually isn't necessary — flagging for awareness. Regenerating the
-  evidence artifacts is Phase 6 work.
-- **Partially implemented**: `policy/rego/iam.rego` + `data.json` + `break-glass-allowlist.json`
-  already implement real guardrail rules (deny Azure `Owner`, deny AWS `AdministratorAccess`,
-  deny `break_glass` via joiner/mover) and `.github/workflows/policy-ci.yml` already runs them
-  via `scripts/run_policy_checks.sh` + conftest in CI. Still missing: `policy/opa/` and
-  `policy/conftest/` are empty (`.gitkeep` only) — no Conftest *test cases* proving the
-  guardrails actually catch violations yet (the "tests are what make this credible" part of
-  Phase 3).
-- **Not yet implemented**: All files in `/docs` are empty stubs. `environments/dev` and
-  `environments/prod` are empty — only `sandbox` is populated.
+As of Phase 4 in progress:
+- **Phase 0 (security hygiene) — done.** Hardcoded Azure subscription/tenant ID defaults
+  removed; `.gitignore` covers `terraform.tfvars`, local plan/state artifacts, `__pycache__/`;
+  `policy_input_from_plan.py`/`export_policy_inventory.sh` plan-file mismatch fixed. Known,
+  unremediated exposure: the two real-looking IDs remain in git history (commit `b02b597`) and
+  ~16 already-committed evidence JSON files — rotating isn't usually necessary for a sandbox
+  subscription, regenerating those files is Phase 6 work.
+- **Phase 1 (docs grounded in reality) — done.** README + `docs/01`–`03` written, cross-checked
+  against actual code rather than the aspirational plan. Biggest finding: **JML requests are
+  validated but not enforced against live cloud access** — no Terraform resource in any of the
+  three modules manages per-user group/role membership, so a leaver merge revokes nothing today.
+  Also found `security_analyst`/`auditor` collapse to identical RBAC (a labeling issue, not
+  under-scoping) and `cloud_engineer`/`devsecops_engineer` collapse to identical RBAC (a real,
+  roadmap-worthy gap).
+- **Phase 2 (GCP module) — done.** Module was already code-complete; found and fixed a real bug
+  (missing `[0]` index on `module.gcp_iam` outputs — `terraform plan` with `enable_gcp=true` had
+  never actually been run before and would have hard-failed). Still not deployed against a real
+  GCP project (`gcp_project_id` is a placeholder) — a deliberate scope decision, not a gap.
+- **Phase 3 (policy-as-code) — done.** `policy/rego/iam.rego` now has an 11+-test Conftest suite
+  (`policy/rego/iam_test.rego`) plus a standalone Python test
+  (`scripts/test_policy_input_from_plan.py`). Found and fixed two real bugs independent of the
+  CI-credential gap below: `run_policy_checks.sh`'s `conftest` invocation was missing
+  `--all-namespaces`, so it silently evaluated zero rules and always exited 0 (the policy check
+  had been a no-op since it was written); and the break_glass exemption in
+  `policy_input_from_plan.py` was a spoofable bare substring match (`"break_glass" in addr`) —
+  tightened to anchor on the exact resource construct each module uses, with tests proving both
+  the real grants pass and forged addresses are denied. The break_glass-via-joiner/mover Rego
+  rules remain dormant (no script produces the `kind: "access_request"` input shape they
+  expect) — proven by a test, not just asserted; building that producer is a separate feature.
+- **Phase 4 (GitOps governance) — in progress.** `.github/CODEOWNERS` and PR template already
+  existed and were mostly correct; added the missing `/policy/` entry to CODEOWNERS. Removed the
+  empty `pipelines/github-actions/` (provided no functional value — GitHub Actions only reads
+  `.github/workflows/`, and `docs/01` already documents the real CI/CD flow).
+- **Not yet implemented**: `docs/04`/`docs/05` are one-line stubs. `environments/dev`/`prod` are
+  empty — only `sandbox` is populated. Real AWS permission boundary (still a permissive
+  placeholder). Azure credential path in `policy-ci.yml` — the one remaining blocker to "a
+  violating PR fails automatically."
 
 **Work through `IAM_Project_Rebuild_Plan.md` phase by phase, in order.** Don't skip Phase 0
 (security hygiene). Update the checkboxes in that file as phases complete, and update the

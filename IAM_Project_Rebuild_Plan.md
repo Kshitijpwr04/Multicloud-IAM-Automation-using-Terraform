@@ -48,35 +48,45 @@ Phase 1–10 plan. It's fine — good, even — for a README to have a clearly l
 - [ ] Leave `docs/04` and `docs/05` (guardrails, access reviews) as stubs with a one-line
       "planned in Phase X" note until Phase 3/4 below are done — then fill them for real.
 
-## Phase 2 — Finish the GCP module (~2–4 hrs)
+## Phase 2 — Finish the GCP module (~2–4 hrs) — done
 
-Bring `modules/gcp-iam` to parity with `aws-iam`/`azure-iam` so `terraform plan` in
-`environments/sandbox` actually succeeds. Needs:
-- `variables.tf`: `project_id`, `name_prefix`, `persona_to_role`, `persona_group_emails`
-  (these are already referenced by `environments/sandbox/main.tf` — just not declared).
-- `main.tf`: real resources — at minimum `google_project_iam_member` per persona/role,
-  or Google Groups if you want parity with the Entra ID group pattern in Azure.
-- `outputs.tf`: real outputs (not the current `gcp_module_ready = true` stub) — expose
-  the resource IDs/emails other modules or evidence scripts would need.
+Turned out to already be code-complete (`variables.tf`/`main.tf`/`outputs.tf` all had real
+content) — the actual remaining work was verification, which surfaced a real bug: the two GCP
+outputs in `environments/sandbox/outputs.tf` referenced `module.gcp_iam.<attr>` without the
+`[0]` index required by its `count`-based instantiation, so `terraform plan` with
+`enable_gcp=true` would have hard-failed on first use. Fixed and verified
+(`terraform plan -target=module.gcp_iam`: `7 to add, 0 to change, 0 to destroy`, no errors).
+Not deployed against a real GCP project — deliberate, per the Phase 5 demo strategy below.
 
-## Phase 3 — Policy-as-Code (~3–5 hrs) — the differentiator, currently empty
+## Phase 3 — Policy-as-Code (~3–5 hrs) — the differentiator — done
 
-This is the most interview-relevant piece and it doesn't exist yet. Build:
-- [ ] `policy/opa/guardrails.rego` — deny rules: e.g. no mover request can assign
-      `break_glass` (mirror the check already in `validate_requests.py` — but as an
-      OPA policy over the Terraform plan JSON, not just the YAML request).
-- [ ] `policy/conftest/` — Conftest test cases (`*.rego` test files) that prove the
-      guardrail policy actually catches violations. Tests are what make this credible.
-- [ ] Wire policy evaluation into the CI workflow so a PR that would violate a guardrail
-      fails automatically — this is the "policy-as-code" payoff.
+- [x] `policy/rego/iam.rego` — deny rules already existed (Azure `Owner`, AWS
+      `AdministratorAccess`, `break_glass` via joiner/mover) from before this rebuild pass.
+- [x] `policy/rego/iam_test.rego` — Conftest test suite proving the guardrails catch real
+      violations, including a test proving the break_glass-via-joiner/mover rules are
+      *dormant* (no script produces the input shape they need) rather than just asserting it.
+      Verified the suite itself catches regressions by deliberately breaking a rule and
+      confirming the test failed, then reverting.
+- [~] Wire policy evaluation into CI so a violating PR fails automatically — **partially
+      achieved**. Found and fixed two real bugs blocking this independent of CI credentials:
+      `run_policy_checks.sh`'s `conftest` invocation was missing `--all-namespaces` (silently
+      evaluated zero rules, always exited 0 — the check had been a no-op since it was written),
+      and the break_glass exemption was a spoofable substring match (fixed, with tests proving
+      both the real grants pass and forged addresses are still denied). The one remaining
+      blocker is `.github/workflows/policy-ci.yml` having no Azure credential path (`azure/login`
+      or `ARM_*` secrets) — a credential/infra decision, tracked on the README roadmap, not
+      something closeable by more policy work.
 
-## Phase 4 — GitOps governance files (~30 min, cheap wins)
+## Phase 4 — GitOps governance files (~30 min, cheap wins) — done
 
-- [ ] `.github/CODEOWNERS` — require review on `identities/`, `policy/`, `modules/`.
-- [ ] `.github/PULL_REQUEST_TEMPLATE.md` — checklist referencing the JML request format.
-- [ ] Move/rename so `pipelines/github-actions` isn't an empty folder sitting next to the
-      real workflow in `.github/workflows/` — either populate it with docs about the
-      pipeline or remove the empty folder.
+- [x] `.github/CODEOWNERS` — already required review on `identities/` and `modules/`;
+      `/policy/` was missing and has been added.
+- [x] PR template — already existed at `.github/PULL_REQUEST_TEMPLATE/access-request.md`
+      (directory convention rather than the single `.github/PULL_REQUEST_TEMPLATE.md` named
+      here, but functionally equivalent as the only file in that directory) with a checklist
+      referencing the joiner/mover/leaver request format. No changes needed.
+- [x] `pipelines/github-actions` — removed (provided no functional value; `docs/01` already
+      documents the real CI/CD flow, and GitHub Actions only reads `.github/workflows/`).
 
 ## Phase 5 — Decide the demo strategy (important, decide before Phase 6)
 
